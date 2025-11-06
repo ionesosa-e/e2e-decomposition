@@ -1,0 +1,47 @@
+jqassistant:
+  skip: false
+
+  repositories:
+    local: ./../downloads/jqassistant-repository
+    
+  store:
+    uri: bolt://localhost:${NEO4J_BOLT_PORT:7687}
+    remote:
+      username: ${NEO4J_USER:neo4j}
+      password: ${NEO4J_PASSWORD:${NEO4J_INITIAL_PASSWORD}}
+      encryption: false
+      trust-strategy: trustAllCertificates
+
+  scan:
+    reset: true
+    continue-on-error: true
+    include:
+      files: []
+      urls: []
+    properties:
+      file.exclude: "*/.DS_Store"
+
+  analyze:
+    rule:
+      directory: jqassistant/rules
+      default-concept-severity: MINOR
+      default-constraint-severity: MAJOR
+
+    report:
+      directory: ./runtime/jqassistant/report
+      warn-on-severity: MINOR
+      fail-on-severity: MAJOR
+      continue-on-failure: false
+      create-archive: false
+
+    concepts:
+      - java-classpath:Resolve
+      - java:PackageDependency
+      - java:ArtifactDependency
+      - java:JavaVersion
+
+    constraints: []
+    groups: []
+    rule-parameters: {}
+    execute-applied-concepts: false
+    warn-on-rule-execution-time-seconds: 5

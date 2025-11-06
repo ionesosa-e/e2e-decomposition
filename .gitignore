@@ -1,0 +1,83 @@
+# === External reference repository (DO NOT commit) ===
+/repo-ejemplo/
+/repo-ejemplo/**
+
+# === Tools and downloads (recreated by setup scripts) ===
+/downloads/
+/downloads/**
+/tools/
+/tools/**
+
+# === Local Neo4j data, logs, plugins, imports, generated conf ===
+/neo4j/
+/neo4j/**
+
+# === Runtime outputs (reports, exports, logs, pids, temp) ===
+/runtime/
+/runtime/**
+**/logs/
+**/dumps/
+
+# === jQAssistant runtime reports ===
+**/jqassistant/report/
+jqassistant/runtime/
+/jqassistant/runtime/**
+
+# === Binary artifacts input (not source code) ===
+/jar-target/
+/jar-target/**
+/artifacts/**/*.jar
+/artifacts/**/*.war
+/artifacts/**/*.ear
+
+# === Python / Jupyter (virtual envs, caches, coverage, checkpoints) ===
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+.pyenv/
+.pipenv/
+
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Packaging / build
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Test / tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+
+# Dotenv / local config (keep requirements.txt tracked)
+.env
+.env.*
+.python-version
+
+# Jupyter
+.ipynb_checkpoints/
+*.nbconvert.ipynb
+*_files/
+
+# === System and editor junk ===
+.DS_Store
+*.log
+*.tmp
+*.swp
+
+# === Utility files ===
+/tree.txt
+
+
+
+/reports/

@@ -1,0 +1,13 @@
+# Core
+pandas==2.2.3
+numpy==1.26.4
+matplotlib==3.10.0
+jupyter==1.1.1
+nbconvert==7.16.6
+
+# plotly==6.3.1            # si quieres gráficos interactivos
+# seaborn==0.13.2          # si quieres estilos de gráficos más “bonitos”
+# wordcloud==1.9.4         # si incluimos Wordcloud.ipynb
+# scikit-learn==1.7.2      # para clustering / ML
+# umap-learn==0.5.9.post2  # reducciones a 2D (embeddings)
+# neo4j==5.28.2            # sólo si el notebook se conecta a Neo4j
