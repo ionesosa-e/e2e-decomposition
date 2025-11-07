@@ -21,5 +21,6 @@ echo "DatabaseCsv: $(date +'%Y-%m-%dT%H:%M:%S%z') Running…"
 execute_cypher "${SRC_DIR}/DB_Schema.cypher"    > "${OUT_DIR}/DB_Schema.csv"
 execute_cypher "${SRC_DIR}/Entity_Fields.cypher" > "${OUT_DIR}/Entity_Fields.csv"
 execute_cypher "${SRC_DIR}/Jpa_Entities.cypher"  > "${OUT_DIR}/Jpa_Entities.csv"
+execute_cypher "${SRC_DIR}/Entity_Relationship_Edges.cypher"  > "${OUT_DIR}/Entity_Relationship_Edges.csv"
 
 echo "DatabaseCsv: Done → ${OUT_DIR}"
