@@ -78,9 +78,10 @@ ensure_cfg "server.http.listen_address" ":${NEO4J_HTTP}"
 ensure_cfg "server.https.listen_address" ":${NEO4J_HTTPS}"
 ensure_cfg "dbms.security.procedures.unrestricted" "apoc.*,gds.*"
 ensure_cfg "dbms.security.procedures.allowlist" "apoc.*,gds.*"
-ensure_cfg "server.memory.heap.initial_size" "2g"
-ensure_cfg "server.memory.heap.max_size" "2g"
-ensure_cfg "server.memory.pagecache.size" "2g"
+ensure_cfg "server.memory.heap.initial_size" "4g"
+ensure_cfg "server.memory.heap.max_size" "6g"
+ensure_cfg "server.memory.pagecache.size" "4g"
+ensure_cfg "dbms.memory.transaction.total.max" "3g"
 
 # --- Initial password (Neo4j 5+/2025.x) ---
 if [[ ! -f "${NEO4J_DATA_DIR}/dbms/auth.ini" ]]; then
