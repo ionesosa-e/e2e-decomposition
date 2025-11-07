@@ -1,22 +1,5 @@
-// Number of types per artifact. Requires "Add_file_name and_extension.cypher".
-
- MATCH (artifact:Artifact)-[:CONTAINS]->(type:Type) 
-  WITH artifact.name AS artifactName
-      ,count(DISTINCT type.fqn) AS numberOfArtifactTypes
-      ,collect(DISTINCT type)   AS types
-UNWIND types AS type
-  WITH artifactName
-      ,numberOfArtifactTypes
-      ,type
-      ,labels(type) AS typeLabels
-UNWIND typeLabels AS typeLabel
-  WITH artifactName
-      ,numberOfArtifactTypes
-      ,type
-      ,typeLabel
- WHERE typeLabel IN ['Class', 'Interface', 'Annotation', 'Enum']
-RETURN artifactName
-      ,numberOfArtifactTypes
-      ,typeLabel    AS languageElement
-      ,count(type)  AS numberOfTypes
- ORDER BY numberOfArtifactTypes DESC, artifactName ASC
+MATCH (a:Artifact)-[:CONTAINS]->(:Package)-[:CONTAINS]->(t:Type)
+WITH coalesce(a.fileName, a.name, a.path, a.artifactId, toString(id(a))) AS artifactName,
+     count(DISTINCT t) AS numberOfTypes
+RETURN artifactName, numberOfTypes
+ORDER BY numberOfTypes DESC, artifactName ASC;
