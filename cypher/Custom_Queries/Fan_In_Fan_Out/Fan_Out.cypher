@@ -1,4 +1,3 @@
-// TODO: Reemplaza 'com.salesmanager' con el paquete raíz de tu proyecto
 WITH 'com.salesmanager' AS PROJECT_PACKAGE_PREFIX
 
 MATCH (t:Type)-[:DEPENDS_ON]->(dependent:Type)
