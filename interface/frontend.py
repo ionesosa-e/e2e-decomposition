@@ -5,7 +5,11 @@ import sys
 
 sys.path.append(str(Path(__file__).parent))
 from utils.helpers import read_csv_safe, get_csv_path
-from charts.entry_points_charts import render_main_classes_charts 
+from charts.entry_points_charts import (
+    render_main_classes_charts,
+    render_spring_controllers_charts,
+    render_spring_endpoints_charts
+) 
 
 st.set_page_config(page_title="Analysis decomposition insights", layout="wide")
 
@@ -52,11 +56,33 @@ with entryPoints:
 
     with controllers_tab:
         st.subheader("Spring Controllers Analysis")
-        st.info("This section will show Spring Controller analysis. Coming soon!")
+        st.markdown("Analysis of Spring `@Controller` and `@RestController` annotated classes.")
+
+        csv_path = get_csv_path("API_Entry_Points", "Spring_Controller.csv")
+        df_ctrl = read_csv_safe(csv_path)
+
+        if not df_ctrl.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df_ctrl.head(20))
+
+            render_spring_controllers_charts(df_ctrl)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
 
     with endpoints_tab:
         st.subheader("Spring Endpoints Analysis")
-        st.info("This section will show Spring Endpoints analysis. Coming soon!")
+        st.markdown("Analysis of REST endpoints exposed by Spring controllers.")
+
+        csv_path = get_csv_path("API_Entry_Points", "Spring_Endpoints.csv")
+        df_ep = read_csv_safe(csv_path)
+
+        if not df_ep.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df_ep.head(20))
+
+            render_spring_endpoints_charts(df_ep)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
 
 with db:
     st.header("Database analysis")
