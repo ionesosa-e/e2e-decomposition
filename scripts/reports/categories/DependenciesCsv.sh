@@ -17,7 +17,7 @@ mkdir -p "${OUT_DIR}"
 
 echo "DependenciesCsv: $(date +'%Y-%m-%dT%H:%M:%S%z') Running…"
 
-execute_cypher "${SRC_DIR}/Circular_Dependencies.cypher"        > "${OUT_DIR}/Circular_Dependencies.csv"
+execute_cypher "${SRC_DIR}/Circular_Dependencies.cypher" projectPackagePrefix="${PROJECT_PACKAGE_PREFIX}" > "${OUT_DIR}/Circular_Dependencies.csv"
 execute_cypher "${SRC_DIR}/External_Dependencies.cypher"        > "${OUT_DIR}/External_Dependencies.csv"
 execute_cypher "${SRC_DIR}/Lines_Of_Code.cypher"                > "${OUT_DIR}/Lines_Of_Code.csv"
 execute_cypher "${SRC_DIR}/Modules_And_Artifacts.cypher"        > "${OUT_DIR}/Modules_And_Artifacts.csv"

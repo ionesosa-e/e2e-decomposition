@@ -1,9 +1,6 @@
-
-WITH 'com.salesmanager' AS PROJECT_PACKAGE_PREFIX
-
 MATCH (p1:Package)-[:CONTAINS]->(t1:Type)-[:DEPENDS_ON]->(t2:Type)<-[:CONTAINS]-(p2:Package)
-WHERE p1.fqn STARTS WITH PROJECT_PACKAGE_PREFIX
-  AND p2.fqn STARTS WITH PROJECT_PACKAGE_PREFIX
+WHERE p1.fqn STARTS WITH $projectPackagePrefix
+  AND p2.fqn STARTS WITH $projectPackagePrefix
   AND p1.fqn < p2.fqn
   AND NOT t1.fqn CONTAINS '$'
   AND NOT t2.fqn CONTAINS '$'

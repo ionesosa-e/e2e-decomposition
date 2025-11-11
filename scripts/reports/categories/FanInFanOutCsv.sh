@@ -17,7 +17,7 @@ mkdir -p "${OUT_DIR}"
 
 echo "FanInFanOutCsv: $(date +'%Y-%m-%dT%H:%M:%S%z') Running…"
 
-execute_cypher "${SRC_DIR}/Fan_In.cypher"  > "${OUT_DIR}/Fan_In.csv"
-execute_cypher "${SRC_DIR}/Fan_Out.cypher" > "${OUT_DIR}/Fan_Out.csv"
+execute_cypher "${SRC_DIR}/Fan_In.cypher"  projectPackagePrefix="${PROJECT_PACKAGE_PREFIX}" > "${OUT_DIR}/Fan_In.csv"
+execute_cypher "${SRC_DIR}/Fan_Out.cypher" projectPackagePrefix="${PROJECT_PACKAGE_PREFIX}" > "${OUT_DIR}/Fan_Out.csv"
 
 echo "FanInFanOutCsv: Done → ${OUT_DIR}"

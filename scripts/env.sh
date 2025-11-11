@@ -42,6 +42,9 @@ export NEO4J_PLUGINS_DIRECTORY="${ROOT_DIRECTORY}/neo4j/plugins"
 export ARTIFACTS_DIRECTORY="${ROOT_DIRECTORY}/jar-target"
 export REPO_TO_ANALYZE="${ARTIFACTS_DIRECTORY}"
 
+# --- Project configuration ---
+export PROJECT_PACKAGE_PREFIX="com.encora.spark"
+
 # --- jQAssistant CLI download ---
 export JQASSISTANT_CLI_ARTIFACT="jqassistant-commandline-neo4jv5"
 export JQASSISTANT_CLI_DOWNLOAD_URL="https://repo1.maven.org/maven2/com/buschmais/jqassistant/cli"
