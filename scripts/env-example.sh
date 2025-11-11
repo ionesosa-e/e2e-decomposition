@@ -21,7 +21,6 @@ export NEO4J_HTTPS_PORT=7473
 export NEO4J_BOLT_PORT=7687
 
 # --- Portable project root (works in bash and zsh) ---
-# Resolve the directory of this file even when sourced.
 if [[ -n "${BASH_SOURCE:-}" ]]; then
   _SELF_PATH="${BASH_SOURCE[0]}"
 elif [[ -n "${ZSH_VERSION:-}" ]]; then
@@ -40,10 +39,8 @@ export NEO4J_IMPORT_DIRECTORY="${ROOT_DIRECTORY}/neo4j/import"
 export NEO4J_CONF_DIRECTORY="${ROOT_DIRECTORY}/neo4j/conf"
 export NEO4J_PLUGINS_DIRECTORY="${ROOT_DIRECTORY}/neo4j/plugins"
 
-# --- Targets to analyze ---
+# --- Targets to analyze (solo jar-target) ---
 export ARTIFACTS_DIRECTORY="${ROOT_DIRECTORY}/jar-target"
-# export ARTIFACTS_DIRECTORY="${ROOT_DIRECTORY}/../jar-target"
-export SOURCE_DIRECTORY="${ROOT_DIRECTORY}/source"
 export REPO_TO_ANALYZE="${ARTIFACTS_DIRECTORY}"
 
 # --- jQAssistant CLI download ---
@@ -54,6 +51,26 @@ export JQASSISTANT_CLI_DOWNLOAD_URL="https://repo1.maven.org/maven2/com/buschmai
 export JQA_REPORT_DIR="${ROOT_DIRECTORY}/runtime/jqassistant/report"
 export EXPORTS_DIR="${ROOT_DIRECTORY}/runtime/exports"
 
+# --- Pipeline folders (añadido) ---
+export CYPHER_DIR="${ROOT_DIRECTORY}/cypher"
+export REPORTS_DIR="${ROOT_DIRECTORY}/reports"
+export JUPYTER_DIR="${ROOT_DIRECTORY}/jupyter"
+
+# --- Neo4j/JQA homes (añadido, coherente con /tools) ---
+export NEO4J_HOME="${TOOLS_DIRECTORY}/neo4j-community-${NEO4J_VERSION}"
+export JQA_HOME="${TOOLS_DIRECTORY}/${JQASSISTANT_CLI_ARTIFACT}-${JQASSISTANT_CLI_VERSION}"
+
+# --- Connection strings (añadido) ---
+export NEO4J_URI="bolt://localhost:${NEO4J_BOLT_PORT}"
+export NEO4J_HTTP_URL="http://localhost:${NEO4J_HTTP_PORT}"
+
+# --- PATH (añadido) ---
+export PATH="${NEO4J_HOME}/bin:${JQA_HOME}/bin:${PATH}"
+
+# --- Python/Jupyter (añadido) ---
+export VENV_DIR="${ROOT_DIRECTORY}/.venv"
+export PIP_REQUIREMENTS="${ROOT_DIRECTORY}/requirements.txt"
+
 # --- Basic guard ---
 if [[ -z "${NEO4J_INITIAL_PASSWORD}" ]]; then
   echo "ERROR: NEO4J_INITIAL_PASSWORD is empty."; return 1 2>/dev/null || exit 1
@@ -62,3 +79,5 @@ fi
 echo "Env loaded: Neo4j ${NEO4J_EDITION} ${NEO4J_VERSION}, APOC ${APOC_VERSION}, GDS(${GDS_EDITION}) ${GDS_VERSION_OPEN}/${GDS_VERSION_FULL}"
 echo "Ports: HTTP ${NEO4J_HTTP_PORT}, HTTPS ${NEO4J_HTTPS_PORT}, BOLT ${NEO4J_BOLT_PORT}"
 echo "Root: ${ROOT_DIRECTORY}"
+echo "Cypher: ${CYPHER_DIR}  Reports: ${REPORTS_DIR}  Jupyter: ${JUPYTER_DIR}"
+echo "NEO4J_HOME: ${NEO4J_HOME}  JQA_HOME: ${JQA_HOME}"
