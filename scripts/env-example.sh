@@ -54,6 +54,7 @@ export EXPORTS_DIR="${ROOT_DIRECTORY}/runtime/exports"
 # --- Pipeline folders ---
 export CYPHER_DIR="${ROOT_DIRECTORY}/cypher"
 export REPORTS_DIR="${ROOT_DIRECTORY}/reports"
+export CSV_REPORTS_DIRECTORY="${ROOT_DIRECTORY}/reports/csv-reports"
 export JUPYTER_DIR="${ROOT_DIRECTORY}/jupyter"
 
 # --- Neo4j/JQA homes ---
@@ -85,3 +86,16 @@ echo "Ports: HTTP ${NEO4J_HTTP_PORT}, HTTPS ${NEO4J_HTTPS_PORT}, BOLT ${NEO4J_BO
 echo "Root: ${ROOT_DIRECTORY}"
 echo "Cypher: ${CYPHER_DIR}  Reports: ${REPORTS_DIR}  Jupyter: ${JUPYTER_DIR}"
 echo "NEO4J_HOME: ${NEO4J_HOME}  JQA_HOME: ${JQA_HOME}"
+
+
+
+# Auto-instalar jq con Homebrew si falta
+export E2E_AUTO_INSTALL_JQ="true"
+
+# Saltar etapas
+# export E2E_SKIP_SETUP="true"
+# export E2E_SKIP_NEO4J="true"
+# export E2E_SKIP_JQA="true"
+# export E2E_SKIP_CSV="true"
+# export E2E_SKIP_NOTEBOOKS="true"
+# export E2E_STOP_NEO4J="true"

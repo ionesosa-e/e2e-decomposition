@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# env-example.sh — copy to scripts/env.sh and edit values as needed.
 
 # --- Versions ---
 export NEO4J_EDITION="community"
@@ -86,3 +85,16 @@ echo "Ports: HTTP ${NEO4J_HTTP_PORT}, HTTPS ${NEO4J_HTTPS_PORT}, BOLT ${NEO4J_BO
 echo "Root: ${ROOT_DIRECTORY}"
 echo "Cypher: ${CYPHER_DIR}  Reports: ${REPORTS_DIR}  Jupyter: ${JUPYTER_DIR}"
 echo "NEO4J_HOME: ${NEO4J_HOME}  JQA_HOME: ${JQA_HOME}"
+
+
+
+# Auto-instalar jq con Homebrew si falta
+export E2E_AUTO_INSTALL_JQ="true"
+
+# Saltar etapas
+# export E2E_SKIP_SETUP="true"
+# export E2E_SKIP_NEO4J="true"
+# export E2E_SKIP_JQA="true"
+# export E2E_SKIP_CSV="true"
+# export E2E_SKIP_NOTEBOOKS="true"
+# export E2E_STOP_NEO4J="true"
