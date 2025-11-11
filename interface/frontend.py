@@ -1,6 +1,11 @@
 import streamlit as st
 import plotly.express as px
-#from ..jupyter/custom/API_Entry_Points import asd 
+from pathlib import Path
+import sys
+
+sys.path.append(str(Path(__file__).parent))
+from utils.helpers import read_csv_safe, get_csv_path
+from charts.entry_points_charts import render_main_classes_charts 
 
 st.set_page_config(page_title="Analysis decomposition insights", layout="wide")
 
@@ -23,6 +28,35 @@ with arch:
 
 with entryPoints:
     st.header("Entry points and controller analysis")
+
+    main_classes_tab, controllers_tab, endpoints_tab = st.tabs([
+        "Main Classes",
+        "Spring Controllers",
+        "Spring Endpoints"
+    ])
+
+    with main_classes_tab:
+        st.subheader("Main Classes Analysis")
+        st.markdown("Distribution and analysis of classes with `main(String[])` methods.")
+
+        csv_path = get_csv_path("API_Entry_Points", "Main_Classes.csv")
+        df_main = read_csv_safe(csv_path)
+
+        if not df_main.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df_main.head(20))
+
+            render_main_classes_charts(df_main)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
+
+    with controllers_tab:
+        st.subheader("Spring Controllers Analysis")
+        st.info("This section will show Spring Controller analysis. Coming soon!")
+
+    with endpoints_tab:
+        st.subheader("Spring Endpoints Analysis")
+        st.info("This section will show Spring Endpoints analysis. Coming soon!")
 
 with db:
     st.header("Database analysis")
