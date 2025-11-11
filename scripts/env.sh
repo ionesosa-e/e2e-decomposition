@@ -54,6 +54,7 @@ export EXPORTS_DIR="${ROOT_DIRECTORY}/runtime/exports"
 # --- Pipeline folders ---
 export CYPHER_DIR="${ROOT_DIRECTORY}/cypher"
 export REPORTS_DIR="${ROOT_DIRECTORY}/reports"
+export CSV_REPORTS_DIRECTORY="${ROOT_DIRECTORY}/reports/csv-reports"
 export JUPYTER_DIR="${ROOT_DIRECTORY}/jupyter"
 
 # --- Neo4j/JQA homes ---
@@ -70,6 +71,10 @@ export PATH="${NEO4J_HOME}/bin:${JQA_HOME}/bin:${PATH}"
 # --- Python/Jupyter ---
 export VENV_DIR="${ROOT_DIRECTORY}/.venv"
 export PIP_REQUIREMENTS="${ROOT_DIRECTORY}/requirements.txt"
+
+# Notebook exports 
+export ENABLE_NOTEBOOK_IPYNB="false"   
+export ENABLE_NOTEBOOK_MD="false"      
 
 # --- Basic guard ---
 if [[ -z "${NEO4J_INITIAL_PASSWORD}" ]]; then

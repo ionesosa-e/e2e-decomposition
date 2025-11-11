@@ -39,7 +39,7 @@ export NEO4J_IMPORT_DIRECTORY="${ROOT_DIRECTORY}/neo4j/import"
 export NEO4J_CONF_DIRECTORY="${ROOT_DIRECTORY}/neo4j/conf"
 export NEO4J_PLUGINS_DIRECTORY="${ROOT_DIRECTORY}/neo4j/plugins"
 
-# --- Targets to analyze (solo jar-target) ---
+# --- Targets to analyze (jar-target) ---
 export ARTIFACTS_DIRECTORY="${ROOT_DIRECTORY}/jar-target"
 export REPO_TO_ANALYZE="${ARTIFACTS_DIRECTORY}"
 
@@ -51,25 +51,29 @@ export JQASSISTANT_CLI_DOWNLOAD_URL="https://repo1.maven.org/maven2/com/buschmai
 export JQA_REPORT_DIR="${ROOT_DIRECTORY}/runtime/jqassistant/report"
 export EXPORTS_DIR="${ROOT_DIRECTORY}/runtime/exports"
 
-# --- Pipeline folders (añadido) ---
+# --- Pipeline folders ---
 export CYPHER_DIR="${ROOT_DIRECTORY}/cypher"
 export REPORTS_DIR="${ROOT_DIRECTORY}/reports"
 export JUPYTER_DIR="${ROOT_DIRECTORY}/jupyter"
 
-# --- Neo4j/JQA homes (añadido, coherente con /tools) ---
+# --- Neo4j/JQA homes ---
 export NEO4J_HOME="${TOOLS_DIRECTORY}/neo4j-community-${NEO4J_VERSION}"
 export JQA_HOME="${TOOLS_DIRECTORY}/${JQASSISTANT_CLI_ARTIFACT}-${JQASSISTANT_CLI_VERSION}"
 
-# --- Connection strings (añadido) ---
+# --- Connection strings ---
 export NEO4J_URI="bolt://localhost:${NEO4J_BOLT_PORT}"
 export NEO4J_HTTP_URL="http://localhost:${NEO4J_HTTP_PORT}"
 
-# --- PATH (añadido) ---
+# --- PATH ---
 export PATH="${NEO4J_HOME}/bin:${JQA_HOME}/bin:${PATH}"
 
-# --- Python/Jupyter (añadido) ---
+# --- Python/Jupyter ---
 export VENV_DIR="${ROOT_DIRECTORY}/.venv"
 export PIP_REQUIREMENTS="${ROOT_DIRECTORY}/requirements.txt"
+
+# Notebook exports 
+export ENABLE_NOTEBOOK_IPYNB="false"   
+export ENABLE_NOTEBOOK_MD="false"      
 
 # --- Basic guard ---
 if [[ -z "${NEO4J_INITIAL_PASSWORD}" ]]; then

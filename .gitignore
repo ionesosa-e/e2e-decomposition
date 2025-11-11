@@ -63,6 +63,7 @@ htmlcov/
 .env
 .env.*
 .python-version
+/scripts/env.sh
 
 # Jupyter
 .ipynb_checkpoints/

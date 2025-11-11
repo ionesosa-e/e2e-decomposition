@@ -12,7 +12,7 @@ source "${SCRIPTS_DIR}/cypher/cypher-helpers.sh"
 
 SECTION="Security"
 SRC_DIR="${CYPHER_DIR}/${SECTION}"
-OUT_DIR="${REPORTS_DIRECTORY}/${SECTION}"
+OUT_DIR="${CSV_REPORTS_DIRECTORY}/${SECTION}"
 mkdir -p "${OUT_DIR}"
 
 echo "SecurityCsv: $(date +'%Y-%m-%dT%H:%M:%S%z') Running…"
