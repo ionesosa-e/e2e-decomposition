@@ -9,12 +9,23 @@ from charts.entry_points_charts import (
     render_main_classes_charts,
     render_spring_controllers_charts,
     render_spring_endpoints_charts
-) 
+)
 from charts.configuration_environment_charts import (
-    render_annotation_chart, 
-    render_feature_flag_chart, 
+    render_annotation_chart,
+    render_feature_flag_chart,
     render_injected_properties_chart,
     render_extension_chart
+)
+from charts.high_level_architecture_charts import (
+    render_layer_violations,
+    render_cyclomatic_complexity,
+    render_deepest_inheritance,
+    render_excessive_dependencies,
+    render_general_count_overview,
+    render_god_classes,
+    render_highest_methods,
+    render_inheritance_between_classes,
+    render_package_structure
 )
 
 st.set_page_config(page_title="Analysis decomposition insights", layout="wide")
@@ -31,10 +42,117 @@ with stack:
 
 with arch:
     st.header("High level architecture analysis")
-    st.text("Prueba")
-    st.text_area("Otra")
-    st.warning("Que")
-    sad = st.button("Advanced")
+
+    code_quality_tab, code_smells_tab, overview_tab = st.tabs([
+        "Code Quality",
+        "Code Smells",
+        "Overview"
+    ])
+
+    with code_quality_tab:
+        st.markdown("### Architectural Layer Violations")
+        csv_path = get_csv_path("High_Level_Architecture", "Architectural_Layer_Violation.csv")
+        df = read_csv_safe(csv_path)
+        if not df.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df.head(20))
+            render_layer_violations(df)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
+
+        st.divider()
+
+        st.markdown("### Cyclomatic Complexity")
+        csv_path = get_csv_path("High_Level_Architecture", "Cyclomatic_Complexity.csv")
+        df = read_csv_safe(csv_path)
+        if not df.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df.head(20))
+            render_cyclomatic_complexity(df)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
+
+        st.divider()
+
+        st.markdown("### Deepest Inheritance")
+        csv_path = get_csv_path("High_Level_Architecture", "Deepest_Inheritance.csv")
+        df = read_csv_safe(csv_path)
+        if not df.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df.head(20))
+            render_deepest_inheritance(df)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
+
+    with code_smells_tab:
+        st.markdown("### Excessive Dependencies")
+        csv_path = get_csv_path("High_Level_Architecture", "Excessive_Dependencies.csv")
+        df = read_csv_safe(csv_path)
+        if not df.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df.head(20))
+            render_excessive_dependencies(df)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
+
+        st.divider()
+
+        st.markdown("### God Classes")
+        csv_path = get_csv_path("High_Level_Architecture", "God_Classes.csv")
+        df = read_csv_safe(csv_path)
+        if not df.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df.head(20))
+            render_god_classes(df)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
+
+        st.divider()
+
+        st.markdown("### Highest Number of Methods")
+        csv_path = get_csv_path("High_Level_Architecture", "Highest_Number_Methods_Class.csv")
+        df = read_csv_safe(csv_path)
+        if not df.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df.head(20))
+            render_highest_methods(df)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
+
+    with overview_tab:
+        st.markdown("### General Count Overview")
+        csv_path = get_csv_path("High_Level_Architecture", "General_Count_Overview.csv")
+        df = read_csv_safe(csv_path)
+        if not df.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df.head(20))
+            render_general_count_overview(df)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
+
+        st.divider()
+
+        st.markdown("### Inheritance Between Classes")
+        csv_path = get_csv_path("High_Level_Architecture", "Inheritance_Between_Classes.csv")
+        df = read_csv_safe(csv_path)
+        if not df.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df.head(20))
+            render_inheritance_between_classes(df)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
+
+        st.divider()
+
+        st.markdown("### Package Structure")
+        csv_path = get_csv_path("High_Level_Architecture", "Package_Structure.csv")
+        df = read_csv_safe(csv_path)
+        if not df.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df.head(20))
+            render_package_structure(df)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
 
 with entryPoints:
     st.header("Entry points and controller analysis")
