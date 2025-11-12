@@ -1,0 +1,6 @@
+{
+  "input_path": "./jar-target/app.jar",
+  "output_path": "./reports",
+  "packages": ["com.myapp.*", "org.example.service.*"],
+  "extra_settings": {}
+}
