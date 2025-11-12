@@ -79,6 +79,7 @@ htmlcov/
 
 # === Utility files ===
 /tree.txt
+/tree.json
 
 
 

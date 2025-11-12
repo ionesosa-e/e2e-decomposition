@@ -21,6 +21,10 @@ fi
 # shellcheck disable=SC1090
 source "$ENV_FILE"
 
+# Apply JSON overrides (REPO_TO_ANALYZE, REPORTS_DIR, CSV_REPORTS_DIRECTORY)
+# shellcheck disable=SC1091
+source "$REPO_ROOT/scripts/config/apply-scope-env.sh" || true
+
 # Flags (env-driven)
 E2E_SKIP_SETUP="${E2E_SKIP_SETUP:-false}"
 E2E_SKIP_NEO4J="${E2E_SKIP_NEO4J:-false}"
@@ -44,7 +48,7 @@ CSV_ALL="$REPO_ROOT/scripts/reports/AllCsvReports.sh"
 NB_RUN_ALL="$REPO_ROOT/scripts/jupyter/jupyter-run-notebooks.sh"
 
 CSV_OUT_BASE="${CSV_REPORTS_DIRECTORY:-$REPO_ROOT/reports/csv-reports}"
-NB_OUT_BASE="${REPORTS_DIRECTORY:-$REPO_ROOT/reports}/notebooks"
+NB_OUT_BASE="${REPORTS_DIR:-$REPO_ROOT/reports}/notebooks"
 
 # -------- Preflight / setup --------
 if [[ "$E2E_SKIP_SETUP" != "true" ]]; then

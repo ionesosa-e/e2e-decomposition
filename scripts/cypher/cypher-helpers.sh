@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# This helper centralizes Cypher execution and parameter passing.
+# It injects scopePackage=<SCOPE_PACKAGE> unless the caller already provided scopePackage=...
+# Code and comments in English.
+
 # Resolve this script dir
 HELPER_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd -P )"
 
@@ -24,27 +28,72 @@ _resolve_cypher_path() {
   echo "ERROR: Cypher file not found: $q (searched under ${CYPHER_DIR})" >&2; return 1
 }
 
+ensure_dir() { mkdir -p "$1"; }
+
+# --- Internal: append scope parameter if missing (bash 3.2-friendly) ----------
+# Note: Implemented inline in wrappers to avoid nameref/local -n (unsupported on bash 3.2).
+# -----------------------------------------------------------------------------
+
 execute_cypher() {
   local cypher_path; cypher_path=$(_resolve_cypher_path "$1"); shift || true
-  "${EXECUTE_QUERY_BIN}" "${cypher_path}" "$@"
+  local params=("$@")
+
+  # Append scopePackage unless already provided by the caller
+  local add_scope="true" p
+  for p in "${params[@]:-}"; do
+    if [[ "$p" == scopePackage=* ]]; then
+      add_scope="false"; break
+    fi
+  done
+  if [[ "$add_scope" == "true" ]]; then
+    params+=("scopePackage=${SCOPE_PACKAGE:-}")
+  fi
+
+  "${EXECUTE_QUERY_BIN}" "${cypher_path}" "${params[@]}"
 }
 
 execute_cypher_no_src() {
   local cypher_path; cypher_path=$(_resolve_cypher_path "$1"); shift || true
-  "${EXECUTE_QUERY_BIN}" --no-source-reference-column "${cypher_path}" "$@"
+  local params=("$@")
+
+  local add_scope="true" p
+  for p in "${params[@]:-}"; do
+    if [[ "$p" == scopePackage=* ]]; then
+      add_scope="false"; break
+    fi
+  done
+  if [[ "$add_scope" == "true" ]]; then
+    params+=("scopePackage=${SCOPE_PACKAGE:-}")
+  fi
+
+  "${EXECUTE_QUERY_BIN}" --no-source-reference-column "${cypher_path}" "${params[@]}"
 }
 
 execute_cypher_md() {
   local cypher_path; cypher_path=$(_resolve_cypher_path "$1"); shift || true
-  "${EXECUTE_QUERY_BIN}" --output-markdown-table "${cypher_path}" "$@"
+  local params=("$@")
+
+  local add_scope="true" p
+  for p in "${params[@]:-}"; do
+    if [[ "$p" == scopePackage=* ]]; then
+      add_scope="false"; break
+    fi
+  done
+  if [[ "$add_scope" == "true" ]]; then
+    params+=("scopePackage=${SCOPE_PACKAGE:-}")
+  fi
+
+  "${EXECUTE_QUERY_BIN}" --output-markdown-table "${cypher_path}" "${params[@]}"
 }
 
 execute_cypher_http_number_of_lines_in_result() {
+  # Note: This helper does a raw count and intentionally does not inject scope parameters.
+  # If you need scoped counting, prefer calling execute_cypher and count externally.
   local cypher_path out_csv lines
   cypher_path=$(_resolve_cypher_path "$1")
-  if ! out_csv=$("${EXECUTE_QUERY_BIN}" --no-source-reference-column "${cypher_path}" 2>/dev/null); then echo "0"; return 0; fi
+  if ! out_csv=$("${EXECUTE_QUERY_BIN}" --no-source-reference-column "${cypher_path}" 2>/dev/null); then
+    echo "0"; return 0
+  fi
   lines=$(echo -n "${out_csv}" | wc -l | tr -d ' ')
   if [[ "${lines}" -ge 1 ]]; then echo $((lines - 1)); else echo "0"; fi
 }
-
-ensure_dir() { mkdir -p "$1"; }
