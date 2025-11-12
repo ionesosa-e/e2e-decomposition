@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from pathlib import Path
 import textwrap
 
@@ -45,3 +46,34 @@ def fillna_safe(series, value):
 def get_csv_path(category: str, filename: str) -> Path:
     """Get the full path to a CSV file in the reports directory."""
     return CSV_BASE / category / filename
+
+def labelize_na(s, label="N/A"):
+    """Replace NA-like values with a visible label for categorical charts."""
+    s = s.copy()
+    s = s.mask(s.isna(), label).astype(str)
+    s = s.replace({"nan": label, "NaN": label})
+    return s
+
+def pick_col(df, names=None, kind=None):
+    """Pick a useful column by preference list or dtype kind ('numeric' | 'text')."""
+    names = names or []
+    by_lower = {c.lower(): c for c in df.columns}
+    if kind == "numeric":
+        nums = list(df.select_dtypes(include=[np.number]).columns)
+        return nums[0] if nums else None
+    if kind == "text":
+        objs = [c for c in df.columns if df[c].dtype == "object"]
+        return objs[0] if objs else (df.columns[0] if len(df.columns) else None)
+    for n in names:
+        got = by_lower.get(n.lower())
+        if got:
+            return got
+    return None
+
+def ext_from_name(x: str) -> str:
+    """Derive a file extension from a filename/path; 'unknown' if none."""
+    s = str(x)
+    if "." in s:
+        return s.split(".")[-1].lower()
+    return "unknown"
+

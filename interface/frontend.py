@@ -10,6 +10,12 @@ from charts.entry_points_charts import (
     render_spring_controllers_charts,
     render_spring_endpoints_charts
 ) 
+from charts.configuration_environment_charts import (
+    render_annotation_chart, 
+    render_feature_flag_chart, 
+    render_injected_properties_chart,
+    render_extension_chart
+)
 
 st.set_page_config(page_title="Analysis decomposition insights", layout="wide")
 
@@ -102,6 +108,77 @@ with sec:
 with config:
     st.header("Configuration environment analysis")
 
+    config_classes, config_files, feature_flags, injected_properties = st.tabs([
+        "Configuration Classes",
+        "Configuration Files",
+        "Feature Flags",
+        "Injected Properties"
+    ])
+
+    with config_classes:
+        st.subheader("Configuration Classes Analysis")
+        st.markdown("Distribution and analysis of classes with `configuration` annotations types.")
+
+        csv_path = get_csv_path("Configuration_Environment", "Configuration_Classes.csv")
+        df_main = read_csv_safe(csv_path)
+
+        if not df_main.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df_main.head(20))
+
+            render_annotation_chart(df_main)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
+
+    
+    with config_files:
+        st.subheader("Configuration Files Analysis")
+        st.markdown("Analysis of configuration files and their paths/extensions")
+
+        csv_path = get_csv_path("Configuration_Environment", "Configuration_Files.csv")
+        df_main = read_csv_safe(csv_path)
+
+        if not df_main.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df_main.head(20))
+
+            render_extension_chart(df_main)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
+
+
+    with feature_flags:
+        st.subheader("Feature Flags Analysis")
+        st.markdown("Discovery and analysis of feature flags used in the application ")
+
+        csv_path = get_csv_path("Configuration_Environment", "Feature_Flags.csv")
+        df_main = read_csv_safe(csv_path)
+
+        if not df_main.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df_main.head(20))
+
+            render_feature_flag_chart(df_main)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
+
+
+    with injected_properties:
+        st.subheader("Injected Properties Analysis")
+        st.markdown("Discovery and analysis of injected properties used in the application ")
+
+        csv_path = get_csv_path("Configuration_Environment", "Injected_Properties.csv")
+        df_main = read_csv_safe(csv_path)
+
+        if not df_main.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df_main.head(20))
+
+            render_injected_properties_chart(df_main)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
+
 with test:
     st.header("Testing analysis")
+    st.warning("Testing queries were disabled for this analysis")
 
