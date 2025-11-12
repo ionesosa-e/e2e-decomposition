@@ -27,6 +27,14 @@ from charts.high_level_architecture_charts import (
     render_inheritance_between_classes,
     render_package_structure
 )
+from charts.dependencies_charts import (
+    render_circular_dependencies,
+    render_external_dependencies,
+    render_lines_of_code,
+    render_modules_and_artifacts,
+    render_package_dependencies,
+    render_package_dependencies_classes
+)
 
 st.set_page_config(page_title="Analysis decomposition insights", layout="wide")
 
@@ -213,6 +221,105 @@ with db:
 
 with dep:
     st.header("Dependency overview analysis")
+
+    circular_tab, external_tab, loc_tab, modules_tab, packages_tab, classes_tab = st.tabs([
+        "Circular Dependencies",
+        "External Dependencies",
+        "Lines of Code",
+        "Modules & Artifacts",
+        "Package Dependencies",
+        "Package Dependencies - Classes"
+    ])
+
+    with circular_tab:
+        st.subheader("Circular Dependencies Analysis")
+        st.markdown("Analysis of circular dependencies between packages.")
+
+        csv_path = get_csv_path("Dependencies", "Circular_Dependencies.csv")
+        df = read_csv_safe(csv_path)
+
+        if not df.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df.head(20))
+
+            render_circular_dependencies(df)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
+
+    with external_tab:
+        st.subheader("External Dependencies Analysis")
+        st.markdown("Overview of external dependencies (group → artifact).")
+
+        csv_path = get_csv_path("Dependencies", "External_Dependencies.csv")
+        df = read_csv_safe(csv_path)
+
+        if not df.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df.head(20))
+
+            render_external_dependencies(df)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
+
+    with loc_tab:
+        st.subheader("Lines of Code Analysis")
+        st.markdown("Top classes by lines of code and their distribution.")
+
+        csv_path = get_csv_path("Dependencies", "Lines_Of_Code.csv")
+        df = read_csv_safe(csv_path)
+
+        if not df.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df.head(20))
+
+            render_lines_of_code(df)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
+
+    with modules_tab:
+        st.subheader("Modules & Artifacts Analysis")
+        st.markdown("In/Out degree per artifact and top outgoing dependencies.")
+
+        csv_path = get_csv_path("Dependencies", "Modules_And_Artifacts.csv")
+        df = read_csv_safe(csv_path)
+
+        if not df.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df.head(20))
+
+            render_modules_and_artifacts(df)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
+
+    with packages_tab:
+        st.subheader("Package Dependencies Analysis")
+        st.markdown("Analysis of package-to-package dependencies (origin → destination).")
+
+        csv_path = get_csv_path("Dependencies", "Package_Dependencies.csv")
+        df = read_csv_safe(csv_path)
+
+        if not df.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df.head(20))
+
+            render_package_dependencies(df)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
+
+    with classes_tab:
+        st.subheader("Package Dependencies - Classes Analysis")
+        st.markdown("Top class-to-class dependency pairs by weight.")
+
+        csv_path = get_csv_path("Dependencies", "Package_Dependencies_Classes.csv")
+        df = read_csv_safe(csv_path)
+
+        if not df.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df.head(20))
+
+            render_package_dependencies_classes(df)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
 
 with integration:
     st.header("Extneral integration analysis")

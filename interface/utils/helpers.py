@@ -77,3 +77,15 @@ def ext_from_name(x: str) -> str:
         return s.split(".")[-1].lower()
     return "unknown"
 
+
+def find_col(df, *cands, default=None, contains=None):
+    """Find a column by exact candidates or by substring (contains)."""
+    low = {c.lower(): c for c in df.columns}
+    for c in cands:
+        if c and c.lower() in low:
+            return low[c.lower()]
+    if contains:
+        for k, orig in low.items():
+            if contains.lower() in k:
+                return orig
+    return default
