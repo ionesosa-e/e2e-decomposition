@@ -23,8 +23,8 @@ YIELD index, totalCost, path
 WITH statistics, index, totalCost, path
 // Sort longest paths by their length descending and - if equal - by their index ascending
 ORDER BY totalCost DESC, index ASC
-// Only take the top 50 longest paths as a compromise between performance and visualization content
-LIMIT 50
+// Only take the top 5 longest paths as a compromise between performance and visualization content
+LIMIT 2
 
 // Collect all results of the longest path search as well as all nodes of the longest paths
 WITH
@@ -77,7 +77,12 @@ WITH *,
   toFloat(weight - minWeight) * weightNormalizationFactor AS normalizedWeight
 
 WITH *,
-  round((normalizedWeight * 5) + 1, 2) AS penWidth
+  CASE
+    WHEN normalizedWeight < 0.33 THEN 1.0   // relaciones débiles
+    WHEN normalizedWeight < 0.66 THEN 3.0   // medias
+    ELSE 6.0                                // muy fuertes
+  END AS penWidth
+
 
 // Node titles without maxDistanceFromSource (just name or fqn)
 WITH *,
@@ -86,7 +91,8 @@ WITH *,
   CASE
     WHEN isPartOfLongestPath       THEN "; color=\"red\""        // longest path edges
     WHEN contributesToALongestPath THEN "; color=\"darkorange\"" // contributing edges
-    ELSE "" END AS edgeColorr
+    ELSE "" END AS edgeColor
+
 
 // Prepare the GraphViz edge attributes for the visualization
 WITH *,
