@@ -10,7 +10,7 @@ seaborn==0.13.2
 wordcloud==1.9.4         # si incluimos Wordcloud.ipynb
 # scikit-learn==1.7.2      # para clustering / ML
 umap-learn==0.5.9.post2  # reducciones a 2D (embeddings)
-# neo4j==5.28.2            # sólo si el notebook se conecta a Neo4j
+neo4j==5.28.2            # sólo si el notebook se conecta a Neo4j
 streamlit==1.51.0 # Esto es lo que dice el --version 
 # Grafos
-networkx==3.5
+graphviz==0.21
