@@ -35,6 +35,12 @@ from charts.dependencies_charts import (
     render_package_dependencies,
     render_package_dependencies_classes
 )
+from charts.database_charts import (
+    render_jpa_entities,
+    render_entity_fields,
+    render_db_schema,
+    render_entity_relationships
+)
 
 st.set_page_config(page_title="Analysis decomposition insights", layout="wide")
 
@@ -218,6 +224,73 @@ with entryPoints:
 
 with db:
     st.header("Database analysis")
+
+    jpa_tab, fields_tab, schema_tab, relationships_tab = st.tabs([
+        "JPA Entities",
+        "Entity Fields",
+        "DB Schema",
+        "Entity Relationships"
+    ])
+
+    with jpa_tab:
+        st.subheader("JPA Entities Analysis")
+        st.markdown("Tables by number of mapped entities.")
+
+        csv_path = get_csv_path("Database", "Jpa_Entities.csv")
+        df = read_csv_safe(csv_path)
+
+        if not df.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df.head(20))
+
+            render_jpa_entities(df)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
+
+    with fields_tab:
+        st.subheader("Entity Fields Analysis")
+        st.markdown("Top field annotations across all entities.")
+
+        csv_path = get_csv_path("Database", "Entity_Fields.csv")
+        df = read_csv_safe(csv_path)
+
+        if not df.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df.head(20))
+
+            render_entity_fields(df)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
+
+    with schema_tab:
+        st.subheader("DB Schema Analysis")
+        st.markdown("Relationship statistics for database entities.")
+
+        csv_path = get_csv_path("Database", "DB_Schema.csv")
+        df = read_csv_safe(csv_path)
+
+        if not df.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df.head(20))
+
+            render_db_schema(df)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
+
+    with relationships_tab:
+        st.subheader("Entity Relationships Analysis")
+        st.markdown("Entity → Entity relationships visualized as a Sankey diagram.")
+
+        csv_path = get_csv_path("Database", "Entity_Relationship_Edges.csv")
+        df = read_csv_safe(csv_path)
+
+        if not df.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df.head(20))
+
+            render_entity_relationships(df)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
 
 with dep:
     st.header("Dependency overview analysis")
