@@ -1,159 +1,139 @@
 # 🧩 E2E Code Decomposition Pipeline
 
-This repository provides an **end-to-end automated pipeline** that scans, analyzes, and visualizes Java codebases as graph structures using **jQAssistant**, **Neo4j**, and **Jupyter Notebooks**.
+This repository provides an automated **end-to-end analysis pipeline**
+that scans a Java project using **jQAssistant**, stores results in
+**Neo4j**, and generates **CSV reports** and **HTML notebook
+visualizations** --- all with **one single command**.
 
-The entire process — from setup to report generation — can now be executed with **a single command**:
+------------------------------------------------------------------------
 
-```bash
+# 🚀 Run Everything (One Command)
+
+``` bash
 scripts/pipeline-run-all.sh
 ```
 
----
+This command will:
 
-## 🚀 Overview
+-   Create `scripts/env.sh` if missing (from `env-example.sh`)
+-   Set up Python virtualenv and dependencies
+-   Start Neo4j and validate connectivity
+-   Run jQAssistant scan over the target project
+-   Generate **all CSV reports** from Cypher queries
+-   Execute **all Jupyter notebooks** and export them to HTML
+-   Generate an index page at `reports/notebooks/index.html`
 
-The pipeline automatically performs the following steps:
+Once completed, results are located in:
 
-1. **Environment setup**
-   - Ensures dependencies like `jq`, `python3`, and `jupyter` are available.
-   - Creates and activates a Python virtual environment (`.venv`).
-   - Installs required Python packages.
+-   **CSV reports:** `reports/csv-reports/`
+-   **Notebook HTML reports:** `reports/notebooks/`
 
-2. **Neo4j setup**
-   - Initializes, starts, and validates a Neo4j instance.
-   - Runs a lightweight smoke test to confirm connectivity.
+------------------------------------------------------------------------
 
-3. **jQAssistant scan**
-   - Installs or updates jQAssistant.
-   - Scans the target project and stores graph data in Neo4j.
+# ⚙️ Configuration
 
-4. **CSV report generation**
-   - Executes all Cypher-based reports in `/cypher/**`.
-   - Exports structured CSVs under:
-     ```
-     reports/csv-reports/<Category>/
-     ```
+All environment variables are controlled through:
 
-5. **Notebook visualization**
-   - Executes all Jupyter notebooks from `/jupyter/`.
-   - Generates interactive **HTML reports** in:
-     ```
-     reports/notebooks/<NotebookName>/<NotebookName>.html
-     ```
-   - Creates an automatic HTML index at:
-     ```
-     reports/notebooks/index.html
-     ```
+    scripts/env.sh
 
----
+If this file does not exist, the pipeline creates it automatically.
 
-## ⚙️ Configuration
+You may adjust:
 
-All environment variables and paths are controlled through:
+-   Neo4j credentials and ports\
+-   Output folder for reports\
+-   Project path to analyze (`REPO_TO_ANALYZE`)\
+-   Flags to skip certain stages\
+-   Notebook output directory
 
-```
-scripts/env.sh
-```
+The file:
 
-If it doesn’t exist, the pipeline will **automatically create it** from:
+    config/analysis-scope.json
 
-```
-scripts/env-example.sh
-```
+allows optional scoping of the analysis (e.g., filtering by package
+prefix).
 
-You can modify this file to customize:
-- Neo4j ports, credentials, and directories.
-- Output folders for CSV and notebook reports.
-- Feature flags (e.g., skip steps, enable/disable notebook formats).
+------------------------------------------------------------------------
 
----
+# 🔧 Optional Flags
 
-## 🔧 Optional Flags
+These environment variables change pipeline behavior:
 
-You can control pipeline stages via environment variables in `.env` or `.bashrc`:
+  Variable                Description                          Default
+  ----------------------- ------------------------------------ ---------
+  `E2E_SKIP_SETUP`        Skip Python/jq setup                 `false`
+  `E2E_SKIP_NEO4J`        Skip Neo4j startup/setup             `false`
+  `E2E_SKIP_JQA`          Skip jQAssistant scan                `false`
+  `E2E_SKIP_CSV`          Skip CSV reports                     `false`
+  `E2E_SKIP_NOTEBOOKS`    Skip notebook execution              `false`
+  `E2E_STOP_NEO4J`        Stop Neo4j at end                    `false`
+  `E2E_AUTO_INSTALL_JQ`   Install jq via Homebrew if missing   `false`
 
-| Variable | Description | Default |
-|-----------|--------------|----------|
-| `E2E_SKIP_SETUP` | Skip Python/jq setup | `false` |
-| `E2E_SKIP_NEO4J` | Skip Neo4j start/setup | `false` |
-| `E2E_SKIP_JQA` | Skip jQAssistant scan | `false` |
-| `E2E_SKIP_CSV` | Skip CSV reports | `false` |
-| `E2E_SKIP_NOTEBOOKS` | Skip Jupyter notebooks | `false` |
-| `E2E_STOP_NEO4J` | Stop Neo4j when done | `false` |
-| `E2E_AUTO_INSTALL_JQ` | Auto-install jq via Homebrew if missing | `false` |
+Use these in `scripts/env.sh` or export them before running the
+pipeline.
 
----
+------------------------------------------------------------------------
 
-## 📁 Output Structure
+# 🧠 What the Pipeline Does Internally
 
-After successful execution, results are organized as follows:
+When running `pipeline-run-all.sh`, the following internal flow is
+executed:
 
-```
-reports/
-├── csv-reports/
-│   ├── API_Entry_Points/
-│   ├── Configuration_Environment/
-│   ├── Database/
-│   └── ...
-└── notebooks/
-    ├── API_Entry_Points/
-    │   ├── API_Entry_Points.html
-    │   └── API_Entry_Points.ipynb
-    └── index.html
-```
+1.  **Environment Setup**
+    -   Validates presence of `jq`, `python3`, and `jupyter`.
+    -   Creates and activates a `.venv` virtual environment.
+    -   Installs Python requirements.
+2.  **Neo4j Initialization**
+    -   Sets up Neo4j directories.
+    -   Starts Neo4j.
+    -   Performs a smoke test.
+3.  **jQAssistant Scan**
+    -   Downloads & configures jQAssistant (if needed).
+    -   Scans the target project (JAR or source tree).
+    -   Stores results in the Neo4j graph database.
+4.  **CSV Report Generation**
+    -   Executes **all Cypher queries** under `cypher/**`.
 
----
+    -   Writes CSV output for each category into:
 
-## 🧠 Flow Summary
+            reports/csv-reports/<Category>/
+5.  **Notebook Visualization**
+    -   Runs all notebooks in `jupyter/`.
 
-```text
-pipeline-run-all.sh
- ├── Ensures environment (creates env.sh if missing)
- ├── Sets up Python virtualenv and installs dependencies
- ├── Runs setup/start for Neo4j
- ├── Executes jQAssistant (scan + store in Neo4j)
- ├── Runs all Cypher-based CSV report scripts
- ├── Executes all Jupyter notebooks (HTML by default)
- └── Builds reports/notebooks/index.html
-```
+    -   Exports HTML visualizations to:
 
----
+            reports/notebooks/<NotebookName>/
 
-## ✅ One Command to Run Everything
+    -   Builds an auto-generated index at:
 
-Simply execute:
+            reports/notebooks/index.html
 
-```bash
-scripts/pipeline-run-all.sh
-```
+------------------------------------------------------------------------
 
-This will:
-- Create `scripts/env.sh` (if missing).
-- Prepare and start Neo4j.
-- Run jQAssistant analysis.
-- Generate CSV and HTML reports.
-- Build a navigable HTML index located at:
-  ```
-  reports/notebooks/index.html
-  ```
+# 🧩 Stopping Neo4j
 
-Once done, check:
+If the database remains running and you want to stop it:
 
-- CSV reports → `reports/csv-reports/`
-- Jupyter visualizations → `reports/notebooks/`
-
----
-
-## 🧩 Stop Neo4j Manually (Optional)
-
-If Neo4j is still running and you wish to stop it:
-
-```bash
+``` bash
 scripts/neo4j/neo4j-stop.sh
 ```
 
----
+------------------------------------------------------------------------
 
-**Author:** Internal DevTools Automation  
-**Version:** E2E Decomposition Pipeline — Unified Execution  
-**License:** Internal / Research Use
+# ✅ Summary
+
+To analyze a Java project and generate all reports:
+
+``` bash
+scripts/pipeline-run-all.sh
+```
+
+Outputs will be available under:
+
+-   `reports/csv-reports/`
+-   `reports/notebooks/`
+
+Everything is automated --- from environment setup to graph analysis and
+visualization.
+
+Enjoy exploring your codebase! 🚀
