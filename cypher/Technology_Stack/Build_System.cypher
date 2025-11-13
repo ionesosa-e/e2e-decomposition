@@ -1,22 +1,26 @@
-//CREO QUE ESTO SE PUEDE HACER MEJOR SIN JQAssistant, mas facil y seguro
+// Technology_Stack / Build_System
+// Attempts to detect the build system from the scanned graph.
+// Scope note: global by design (no package-based filtering).
+// NOTE: This might be easier and more robust to determine outside of jQAssistant,
+//       but it is kept here for completeness.
 
 CALL {
-    MATCH (project:Maven:Project)
-    RETURN
-        'Maven' as BuildSystem,
-        project.groupId + ':' + project.artifactId as ProjectName,
-        project.version as ProjectVersion,
-        project.packaging as Packaging
-    LIMIT 1
+  MATCH (project:Maven:Project)
+  RETURN
+    'Maven' AS BuildSystem,
+    project.groupId + ':' + project.artifactId AS ProjectName,
+    project.version AS ProjectVersion,
+    project.packaging AS Packaging
+  LIMIT 1
 
-    UNION ALL
+  UNION ALL
 
-    MATCH (project:Gradle:Project)
-    RETURN
-        'Gradle' as BuildSystem,
-        project.name as ProjectName,
-        project.version as ProjectVersion,
-        'jar' as Packaging
-    LIMIT 1
+  MATCH (project:Gradle:Project)
+  RETURN
+    'Gradle' AS BuildSystem,
+    project.name AS ProjectName,
+    project.version AS ProjectVersion,
+    'jar' AS Packaging
+  LIMIT 1
 }
 RETURN BuildSystem, ProjectName, ProjectVersion, Packaging
