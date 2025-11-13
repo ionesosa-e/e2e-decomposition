@@ -1,5 +1,6 @@
 import streamlit as st
 import plotly.express as px
+import pandas as pd
 from pathlib import Path
 import sys
 
@@ -40,6 +41,9 @@ from charts.database_charts import (
     render_entity_fields,
     render_db_schema,
     render_entity_relationships
+)
+from charts.fan_in_fan_out_charts import (
+    render_fan_in_fan_out
 )
 
 st.set_page_config(page_title="Analysis decomposition insights", layout="wide")
@@ -399,6 +403,31 @@ with integration:
 
 with fanInOut:
     st.header("Fan in and Fan out analysis")
+    st.markdown("""
+    Fan-In measures how many classes depend on a given class (incoming dependencies).
+    Fan-Out measures how many classes a given class depends on (outgoing dependencies).
+    """)
+
+    # Load both CSVs
+    csv_path_in = get_csv_path("Fan_In_Fan_Out", "Fan_In.csv")
+    csv_path_out = get_csv_path("Fan_In_Fan_Out", "Fan_Out.csv")
+
+    df_in = read_csv_safe(csv_path_in)
+    df_out = read_csv_safe(csv_path_out)
+
+    if not df_in.empty or not df_out.empty:
+        with st.expander("View raw data"):
+            col1, col2 = st.columns(2)
+            with col1:
+                st.markdown("**Fan-In Data**")
+                st.dataframe(df_in.head(20) if not df_in.empty else pd.DataFrame())
+            with col2:
+                st.markdown("**Fan-Out Data**")
+                st.dataframe(df_out.head(20) if not df_out.empty else pd.DataFrame())
+
+        render_fan_in_fan_out(df_in, df_out)
+    else:
+        st.warning(f"No data available. Please ensure the CSVs exist at: `{csv_path_in}` and `{csv_path_out}`")
 
 with sec:
     st.header("Security overview analysis")
