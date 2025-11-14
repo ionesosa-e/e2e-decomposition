@@ -50,6 +50,10 @@ from charts.security_charts import (
     render_spring_security,
     render_unsecured_endpoints
 )
+from charts.external_integration_charts import (
+    render_external_sdks,
+    render_hardcoded_urls
+)
 
 st.set_page_config(page_title="Analysis decomposition insights", layout="wide")
 
@@ -404,7 +408,42 @@ with dep:
             st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
 
 with integration:
-    st.header("Extneral integration analysis")
+    st.header("External integration analysis")
+
+    sdks_tab, urls_tab = st.tabs([
+        "External SDKs",
+        "Hardcoded URLs"
+    ])
+
+    with sdks_tab:
+        st.subheader("External SDKs Analysis")
+        st.markdown("Analysis of external SDK dependencies (group → artifact).")
+
+        csv_path = get_csv_path("External_Integration", "External_SDKs.csv")
+        df = read_csv_safe(csv_path)
+
+        if not df.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df.head(20))
+
+            render_external_sdks(df)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
+
+    with urls_tab:
+        st.subheader("Hardcoded URLs Analysis")
+        st.markdown("Analysis of hardcoded URLs found in the codebase.")
+
+        csv_path = get_csv_path("External_Integration", "Hardcoded_URLs.csv")
+        df = read_csv_safe(csv_path)
+
+        if not df.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df.head(20))
+
+            render_hardcoded_urls(df)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
 
 with fanInOut:
     st.header("Fan in and Fan out analysis")
