@@ -45,6 +45,11 @@ from charts.database_charts import (
 from charts.fan_in_fan_out_charts import (
     render_fan_in_fan_out
 )
+from charts.security_charts import (
+    render_security_configurations,
+    render_spring_security,
+    render_unsecured_endpoints
+)
 
 st.set_page_config(page_title="Analysis decomposition insights", layout="wide")
 
@@ -431,6 +436,57 @@ with fanInOut:
 
 with sec:
     st.header("Security overview analysis")
+
+    sec_configs_tab, spring_sec_tab, unsecured_tab = st.tabs([
+        "Security Configurations",
+        "Spring Security",
+        "Unsecured Endpoints"
+    ])
+
+    with sec_configs_tab:
+        st.subheader("Security Configurations Analysis")
+        st.markdown("Analysis of security configuration classes and their properties.")
+
+        csv_path = get_csv_path("Security", "Security_Configurations.csv")
+        df = read_csv_safe(csv_path)
+
+        if not df.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df.head(20))
+
+            render_security_configurations(df)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
+
+    with spring_sec_tab:
+        st.subheader("Spring Security Analysis")
+        st.markdown("Analysis of Spring Security annotations on methods.")
+
+        csv_path = get_csv_path("Security", "Spring_Security.csv")
+        df = read_csv_safe(csv_path)
+
+        if not df.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df.head(20))
+
+            render_spring_security(df)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
+
+    with unsecured_tab:
+        st.subheader("Potentially Unsecured Endpoints Analysis")
+        st.markdown("Analysis of endpoints that may lack security annotations.")
+
+        csv_path = get_csv_path("Security", "Unsecured_Endpoints.csv")
+        df = read_csv_safe(csv_path)
+
+        if not df.empty:
+            with st.expander("View raw data"):
+                st.dataframe(df.head(20))
+
+            render_unsecured_endpoints(df)
+        else:
+            st.warning(f"No data available. Please ensure the CSV exists at: `{csv_path}`")
 
 with config:
     st.header("Configuration environment analysis")
