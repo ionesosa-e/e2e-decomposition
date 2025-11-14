@@ -9,11 +9,16 @@ sys.path.append(str(Path(__file__).parent.parent))
 DEFAULT_BAR_COLOR = ["#1f77b4"]
 
 def build_hierarchy_from_fqns(fqns):
-    """Build labels, parents, values for go.Treemap / go.Icicle from a list of fqns.
+    """Build labels, parents, values, and text for go.Treemap / go.Icicle from a list of fqns.
 
-    Improved version that ensures all nodes have proper values.
+    Returns (labels, parents, values, text) where:
+    - labels: Full FQN paths for uniqueness (e.g., "com.encora.spark.model")
+    - parents: Full FQN paths of parent nodes (e.g., "com.encora.spark")
+    - values: Aggregated counts bottom-up
+    - text: Short display names (e.g., "model")
     """
     def prefixes(fqn):
+        """Generate all prefixes of an FQN."""
         parts = [p for p in str(fqn).split('.') if p]
         acc = []
         for p in parts:
@@ -29,7 +34,7 @@ def build_hierarchy_from_fqns(fqns):
             nodes.add(pref)
 
     if not nodes:
-        return [], [], []
+        return [], [], [], []
 
     leaf_counter = {}
     for f in fqns:
@@ -38,28 +43,36 @@ def build_hierarchy_from_fqns(fqns):
             continue
         leaf_counter[s] = leaf_counter.get(s, 0) + 1
 
-    labels, parents, values = [], [], []
+    node_values = {}
+    for node in sorted(nodes, key=lambda s: (-s.count('.'), s)):  # Process deepest first
+        if node in leaf_counter:
+            node_values[node] = leaf_counter[node]
+        else:
+            # Sum all direct children
+            child_sum = 0
+            for other_node in nodes:
+                if other_node.startswith(node + '.') and other_node.count('.') == node.count('.') + 1:
+                    child_sum += node_values.get(other_node, 0)
+            node_values[node] = child_sum
+
+    labels, parents, values, text = [], [], [], []
     for node in sorted(nodes, key=lambda s: (s.count('.'), s)):
-        label = node.split('.')[-1]
+        # Use full FQN as label for uniqueness
+        label = node
 
         if '.' in node:
             parent_fqn = node.rsplit('.', 1)[0]
-            parent_label = parent_fqn.split('.')[-1]
         else:
-            parent_label = ""
+            parent_fqn = ""
 
-        value = leaf_counter.get(node, 0)
-
-        if value == 0:
-            for leaf_fqn, count in leaf_counter.items():
-                if leaf_fqn.startswith(node + '.'):
-                    value += count
+        short_name = node.split('.')[-1]
 
         labels.append(label)
-        parents.append(parent_label)
-        values.append(value if value > 0 else 1)  # Ensure at least value of 1
+        parents.append(parent_fqn)
+        values.append(node_values.get(node, 1))  # Ensure at least 1
+        text.append(short_name)
 
-    return labels, parents, values
+    return labels, parents, values, text
 
 
 
@@ -320,126 +333,126 @@ def create_methods_violin_chart(df, c_cnt):
 
 
 
-def create_inheritance_sankey(df, c_c1, c_c2, sample_size=120):
-    """Create improved Sankey diagram for inheritance graph (sampled with better styling)."""
+def create_inheritance_sankey(df, c_c1, c_c2, sample_size=50):
     if not c_c1 or not c_c2:
         return None
-    sample = df[[c_c1, c_c2]].dropna().head(sample_size)
-    if sample.empty:
+
+    parent_counts = df[c_c2].value_counts().head(10)  # Top 10 parent classes
+    top_parents = set(parent_counts.index)
+
+    filtered = df[df[c_c2].isin(top_parents)][[c_c1, c_c2]].dropna().head(sample_size)
+
+    if filtered.empty:
         return None
 
-    all_classes = set(sample[c_c1]) | set(sample[c_c2])
+    all_classes = set(filtered[c_c1]) | set(filtered[c_c2])
     labels_full = sorted(all_classes)
-    labels_short = [label.split('.')[-1] if '.' in label else label for label in labels_full]
+
+    def get_display_label(fqn):
+        parts = fqn.split('.')
+        if len(parts) >= 2:
+            return f"{parts[-2]}.{parts[-1]}"
+        return parts[-1] if parts else fqn
+
+    labels_display = [get_display_label(label) for label in labels_full]
     idx = {name: i for i, name in enumerate(labels_full)}
 
-    sources = sample[c_c1].map(idx).tolist()
-    targets = sample[c_c2].map(idx).tolist()
-    values = [1] * len(sample)
+    sources = filtered[c_c1].map(idx).tolist()
+    targets = filtered[c_c2].map(idx).tolist()
+    values = [1] * len(filtered)
 
-    num_nodes = len(labels_short)
-    node_colors = [f"rgba({100 + (i * 155 // num_nodes)}, {150}, {200 - (i * 100 // num_nodes)}, 0.8)"
-                   for i in range(num_nodes)]
+    num_nodes = len(labels_display)
+    pad = max(10, min(20, 300 // num_nodes))  # Adjust padding based on density
+    thickness = max(12, min(20, 400 // num_nodes))  # Adjust thickness based on density
+
+    parent_set = set(filtered[c_c2])
+    node_colors = []
+    for label in labels_full:
+        if label in parent_set:
+            node_colors.append("rgba(65, 105, 225, 0.8)")  # Royal Blue for parents
+        else:
+            node_colors.append("rgba(60, 179, 113, 0.8)")  # Medium Sea Green for children
 
     fig = go.Figure(data=[go.Sankey(
+        arrangement='snap',  # Better auto-layout
         node=dict(
-            label=labels_short,
-            pad=15,
-            thickness=20,
-            line=dict(color="white", width=0.5),
+            label=labels_display,
+            pad=pad,
+            thickness=thickness,
+            line=dict(color="white", width=1),
             color=node_colors
         ),
         link=dict(
             source=sources,
             target=targets,
             value=values,
-            color="rgba(0, 0, 0, 0.2)"
+            color="rgba(0, 0, 0, 0.15)"
         )
     )])
 
     fig.update_layout(
-        title_text=f"Inheritance graph — Top {sample_size} relationships",
-        height=700,
-        width=1200,
+        title_text=f"Inheritance graph — Top {len(filtered)} relationships (Top 10 parents)",
+        height=900,
+        width=1400,
         font=dict(size=10)
     )
     return fig
 
 
 
-def create_package_treemap(fqns):
-    """Create improved treemap for package structure."""
+def analyze_package_structure(fqns):
+    """Analyze package structure and return statistics and hierarchical data for Streamlit display."""
     if not fqns or len(fqns) == 0:
         return None
 
-    labels, parents, values = build_hierarchy_from_fqns(fqns)
+    clean_fqns = [str(f).strip() for f in fqns if str(f).strip() and str(f).strip() != 'nan']
 
-    if not labels or len(labels) == 0:
+    if not clean_fqns:
         return None
 
-    filtered_data = [(l, p, v) for l, p, v in zip(labels, parents, values) if v > 0 or p == ""]
-    if not filtered_data:
-        return None
+    stats = {
+        'total_packages': len(clean_fqns),
+        'unique_packages': len(set(clean_fqns)),
+        'max_depth': max(fqn.count('.') + 1 for fqn in clean_fqns),
+        'avg_depth': sum(fqn.count('.') + 1 for fqn in clean_fqns) / len(clean_fqns)
+    }
 
-    labels, parents, values = zip(*filtered_data)
+    by_level = {}
+    for fqn in clean_fqns:
+        level = fqn.count('.') + 1
+        if level not in by_level:
+            by_level[level] = []
+        by_level[level].append(fqn)
 
-    fig = go.Figure(go.Treemap(
-        labels=list(labels),
-        parents=list(parents),
-        values=list(values),
-        branchvalues="total",
-        textposition="middle center",
-        marker=dict(
-            colorscale='Blues',
-            cmid=sum(values) / len(values) if values else 0
-        ),
-        hovertemplate='<b>%{label}</b><br>Count: %{value}<br>%{percentParent}<extra></extra>'
-    ))
+    root_packages = {}
+    for fqn in clean_fqns:
+        root = fqn.split('.')[0]
+        root_packages[root] = root_packages.get(root, 0) + 1
 
-    fig.update_layout(
-        title="Package structure — hierarchical treemap",
-        height=800,
-        width=1000,
-        margin=dict(t=50, l=25, r=25, b=25)
-    )
-    return fig
+    second_level = {}
+    for fqn in clean_fqns:
+        parts = fqn.split('.')
+        if len(parts) >= 2:
+            key = f"{parts[0]}.{parts[1]}"
+            second_level[key] = second_level.get(key, 0) + 1
 
-def create_package_icicle(fqns):
-    """Create improved icicle chart for package structure."""
-    if not fqns or len(fqns) == 0:
-        return None
+    tree_data = []
+    for fqn in sorted(set(clean_fqns)):
+        parts = fqn.split('.')
+        tree_data.append({
+            'Package FQN': fqn,
+            'Root': parts[0],
+            'Depth': len(parts),
+            'Leaf Name': parts[-1]
+        })
 
-    labels, parents, values = build_hierarchy_from_fqns(fqns)
-
-    if not labels or len(labels) == 0:
-        return None
-
-    filtered_data = [(l, p, v) for l, p, v in zip(labels, parents, values) if v > 0 or p == ""]
-    if not filtered_data:
-        return None
-
-    labels, parents, values = zip(*filtered_data)
-
-    fig = go.Figure(go.Icicle(
-        labels=list(labels),
-        parents=list(parents),
-        values=list(values),
-        branchvalues="total",
-        tiling=dict(orientation='v'),
-        marker=dict(
-            colorscale='Viridis',
-            line=dict(width=2, color='white')
-        ),
-        hovertemplate='<b>%{label}</b><br>Count: %{value}<br>%{percentParent}<extra></extra>'
-    ))
-
-    fig.update_layout(
-        title="Package structure — icicle diagram",
-        height=800,
-        width=1000,
-        margin=dict(t=50, l=25, r=25, b=25)
-    )
-    return fig
+    return {
+        'stats': stats,
+        'by_level': by_level,
+        'root_packages': root_packages,
+        'second_level': second_level,
+        'tree_data': tree_data
+    }
 
 
 
@@ -657,7 +670,7 @@ def render_inheritance_between_classes(df: pd.DataFrame):
         st.info("No inheritance relationships found in sample.")
 
 def render_package_structure(df: pd.DataFrame):
-    """Render Package Structure section for Streamlit."""
+    """Render Package Structure section for Streamlit using native components."""
     import streamlit as st
 
     if df.empty:
@@ -676,12 +689,97 @@ def render_package_structure(df: pd.DataFrame):
         st.info("No package data found.")
         return
 
-    st.subheader("9A) Package Structure — Treemap")
-    fig = create_package_treemap(fqns)
-    if fig:
-        st.plotly_chart(fig, use_container_width=True)
+    analysis = analyze_package_structure(fqns)
 
-    st.subheader("9B) Package Structure — Icicle")
-    fig = create_package_icicle(fqns)
-    if fig:
-        st.plotly_chart(fig, use_container_width=True)
+    if not analysis:
+        st.info("Unable to analyze package structure.")
+        return
+
+    stats = analysis['stats']
+    root_packages = analysis['root_packages']
+    second_level = analysis['second_level']
+    by_level = analysis['by_level']
+    tree_data = analysis['tree_data']
+
+    st.subheader("9A) Package Structure Overview")
+
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Total Packages", stats['total_packages'])
+    with col2:
+        st.metric("Unique Packages", stats['unique_packages'])
+    with col3:
+        st.metric("Max Depth", stats['max_depth'])
+    with col4:
+        st.metric("Avg Depth", f"{stats['avg_depth']:.1f}")
+
+    st.divider()
+
+    st.subheader("9B) Root Packages Distribution")
+    root_df = pd.DataFrame([
+        {'Root Package': k, 'Count': v}
+        for k, v in sorted(root_packages.items(), key=lambda x: x[1], reverse=True)
+    ])
+
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        st.dataframe(
+            root_df,
+            use_container_width=True,
+            height=300,
+            hide_index=True
+        )
+    with col2:
+        st.markdown("**Summary**")
+        st.markdown(f"- **Total root packages:** {len(root_packages)}")
+        st.markdown(f"- **Most common:** {root_df.iloc[0]['Root Package']} ({root_df.iloc[0]['Count']})")
+        if len(root_df) > 1:
+            st.markdown(f"- **Second most:** {root_df.iloc[1]['Root Package']} ({root_df.iloc[1]['Count']})")
+
+    st.divider()
+
+    st.subheader("9C) Second Level Packages (Top 20)")
+    second_level_df = pd.DataFrame([
+        {'Package': k, 'Count': v}
+        for k, v in sorted(second_level.items(), key=lambda x: x[1], reverse=True)[:20]
+    ])
+
+    if not second_level_df.empty:
+        st.dataframe(
+            second_level_df,
+            use_container_width=True,
+            height=400,
+            hide_index=True
+        )
+
+    st.divider()
+
+    st.subheader("9D) Packages by Depth Level")
+
+    level_summary = []
+    for level in sorted(by_level.keys()):
+        level_summary.append({
+            'Depth Level': level,
+            'Package Count': len(by_level[level]),
+            'Example': by_level[level][0] if by_level[level] else 'N/A'
+        })
+
+    level_df = pd.DataFrame(level_summary)
+    st.dataframe(
+        level_df,
+        use_container_width=True,
+        hide_index=True
+    )
+
+    st.divider()
+
+    st.subheader("9E) Complete Package Hierarchy")
+    st.markdown(f"**Total unique packages:** {len(tree_data)}")
+
+    tree_df = pd.DataFrame(tree_data)
+    st.dataframe(
+        tree_df,
+        use_container_width=True,
+        height=500,
+        hide_index=True
+    )
