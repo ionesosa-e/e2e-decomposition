@@ -23,8 +23,8 @@ YIELD index, totalCost, path
 WITH statistics, index, totalCost, path
 // Sort longest paths by their length descending and - if equal - by their index ascending
 ORDER BY totalCost DESC, index ASC
-// Only take the top 5 longest paths as a compromise between performance and visualization content
-LIMIT 2
+// Only take the top N longest paths as a compromise between performance and visualization content
+LIMIT $pathLimit
 
 // Collect all results of the longest path search as well as all nodes of the longest paths
 WITH
