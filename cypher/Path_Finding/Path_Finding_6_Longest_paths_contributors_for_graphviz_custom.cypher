@@ -86,12 +86,25 @@ WITH *,
 
 // Node titles without maxDistanceFromSource (just name or fqn)
 WITH *,
-  coalesce(source.name, source.fqn) AS startNodeTitle,
-  coalesce(target.name, target.fqn) AS endNodeTitle,
+  CASE
+    WHEN $scopePackage IS NOT NULL
+         AND trim($scopePackage) <> ""
+         AND source.fqn STARTS WITH $scopePackage
+      THEN replace(source.fqn, $scopePackage + ".", "")
+    ELSE coalesce(source.fqn, source.name)
+  END AS startNodeTitle,
+  CASE
+    WHEN $scopePackage IS NOT NULL
+         AND trim($scopePackage) <> ""
+         AND target.fqn STARTS WITH $scopePackage
+      THEN replace(target.fqn, $scopePackage + ".", "")
+    ELSE coalesce(target.fqn, target.name)
+  END AS endNodeTitle,
   CASE
     WHEN isPartOfLongestPath       THEN "; color=\"red\""        // longest path edges
     WHEN contributesToALongestPath THEN "; color=\"darkorange\"" // contributing edges
     ELSE "" END AS edgeColor
+
 
 
 // Prepare the GraphViz edge attributes for the visualization
