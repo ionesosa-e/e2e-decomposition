@@ -95,9 +95,6 @@ def create_top_classes_treemap(df: pd.DataFrame, c_decl: str):
     return fig
 
 
-# ============================================================================
-# SECTION 3: POTENTIALLY UNSECURED ENDPOINTS
-# ============================================================================
 
 def create_http_method_donut(df: pd.DataFrame, c_http: str):
     """Create donut chart for potentially unsecured endpoints by HTTP method."""
@@ -247,8 +244,39 @@ def render_unsecured_endpoints(df: pd.DataFrame):
     if fig:
         st.plotly_chart(fig, use_container_width=True)
 
-    # 3D) Compact top endpoints list
-    if c_ep:
-        st.subheader("3D) Top Potentially Unsecured Endpoints")
-        by_ep = df[c_ep].value_counts().rename_axis("endpoint").reset_index(name="count")
-        st.dataframe(by_ep.head(10), use_container_width=True)
+    st.divider()
+
+    st.subheader("3D) Complete List of Potentially Unsecured Endpoints")
+    st.markdown("**⚠️ These endpoints may lack proper security annotations and could be vulnerable.**")
+
+    detailed_endpoints = df[[c_ep, c_http, c_ctrl, c_meth, c_stat]].copy()
+    detailed_endpoints.columns = ['Endpoint Path', 'HTTP Method', 'Controller', 'Method Name', 'Security Status']
+
+    detailed_endpoints = detailed_endpoints.sort_values(['HTTP Method', 'Endpoint Path'])
+
+    def highlight_insecure(row):
+        if 'unsecured' in str(row['Security Status']).lower() or 'potentially' in str(row['Security Status']).lower():
+            return ['background-color: #ffcccc'] * len(row)
+        return [''] * len(row)
+
+    st.markdown(f"**Total potentially unsecured endpoints found:** {len(detailed_endpoints)}")
+
+    styled_df = detailed_endpoints.style.apply(highlight_insecure, axis=1)
+    st.dataframe(
+        styled_df,
+        use_container_width=True,
+        height=600,
+        hide_index=True
+    )
+
+    st.divider()
+
+    st.subheader("3E) Unsecured Endpoints Breakdown by HTTP Method")
+
+    method_breakdown = detailed_endpoints.groupby('HTTP Method').size().reset_index(name='Count')
+    method_breakdown = method_breakdown.sort_values('Count', ascending=False)
+    st.dataframe(
+        method_breakdown,
+        use_container_width=True,
+        hide_index=True
+    )
